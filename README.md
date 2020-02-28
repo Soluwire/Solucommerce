@@ -24,7 +24,7 @@ Solucommerce is a free open-source e-commerce platform written in PHP based on L
 - Login with the defaults : `admin@domain.com` : `admin`
 - Once logged in feel free to add products and product variations. 
 
-##Authors
+## Authors
 - Jack Bayliss, 2020
 
 ## License 
