@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-full">
-        <div v-if="categories!=null" class="bg-white w-1/2 shadow p-2">
+        <div v-if="categories!=null" class="bg-white shadow p-2">
             <h1>Categories</h1>
             <div v-if="categories.length<1">
                 <p>No categories created yet.. Try creating one below.</p>
@@ -10,18 +10,20 @@
                     <thead>
                         <th class="border px-4 py-2">Category Name</th>
                         <th class="border px-4 py-2">Category Description</th>
+                        <th></th>
                     </thead>
                     <tbody>
                         <tr  v-for="(category,key) in categories" :key="key">
-                    <td  class="border px-4 py-2 text-center  bg-gray-100">
-                        {{category.category_name}} 
-        
-
+                    <td class="border px-4 py-2 text-center  bg-gray-100">
+                       <input type="text" v-model="category.category_name">
                     </td>
                     <td class="border px-4 py-2 text-center bg-gray-100">
-                           {{category.category_description}} 
+                        <input type="text" v-model="category.category_description">
                     </td>
-                        </tr>
+                    <td class="border px-4 py-2 text-center bg-gray-100"><button class="bg-red-500 p-2 text-white" @click="deleteCategory(category.id)"> <i class="fas fa-trash"></i></button></td>
+                    <td class="border px-4 py-2 text-center bg-gray-100"><button class="bg-blue-500 p-2 text-white" @click="updateCategory(key)"><i class="fas fa-pen-alt"></i></button></td>
+
+                    </tr>
                          
                     </tbody>
                 </table>
@@ -79,6 +81,37 @@ export default {
 
                }else{
                   toastr.error("Unable to get categories.");
+
+               }
+            })
+        },
+        deleteCategory : function(id){
+            axios.delete("/postcategory/"+id).then(res => {
+               if(res.status==200){
+                  this.$parent.getCategories().then(done => {
+                    this.categories = this.$parent.categories;
+                });
+                
+                  toastr.success("Successfully deleted.");
+
+               }else{
+                  toastr.error("Unable to deleted category.");
+
+               }
+            })
+        },
+        updateCategory : function(key){
+                let category = this.categories[key];
+                axios.patch("/updatecategory", {id: category.id, category_name: category.category_name, category_description: category.category_description }).then(res => {
+               if(res.status==200){
+                  this.$parent.getCategories().then(done => {
+                    this.categories = this.$parent.categories;
+                });
+        
+                  toastr.success("Successfully updated.");
+
+               }else{
+                  toastr.error("Unable to update category.");
 
                }
             })

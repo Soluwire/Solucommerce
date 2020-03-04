@@ -14,7 +14,9 @@
 <meta property="og:type"               content="website" />
 <meta property="og:title"              content="{{$product->product_name}}" />
 <meta property="og:description"        content="{{$product->product_description}}" />
+@if($product->Variants()->exists())
 <meta property="og:image" content="{{asset($product->Variants()->first()->Picture()->first()->path)}}" />
+@endif
 @endsection
 @section('base.content')
 <section id="category" class="flex flex-col px-2">
@@ -45,7 +47,11 @@
              <h3>Variant Description</h3>
              @{{variants[variantSelected].variant_description}}
             </div>
-
+            
+            <div class="p-3 w-full">
+               <h3>Variant Stock</h3>
+               @{{variants[variantSelected].variant_stock}}
+              </div>
              @else
              {{-- Standard product, need to code --}}
              @endif
@@ -69,7 +75,7 @@
          <div class="fotorama">
             @foreach($product->Variants()->get() as $variant)
              @foreach($variant->Picture()->get() as $picture)
-             <img src="{{$picture->path}}" alt="">
+             <img src="{{$picture->path}}" data-name="{{$variant->variant_name}}">
              @endforeach
            @endforeach
          </div>
@@ -88,6 +94,7 @@
 
 
 @section('base.js')
+@if($product->Variants()->exists())
 <script type="application/ld+json">
    {
       "@context": "https://schema.org/",
@@ -123,6 +130,7 @@
       }
     }
    </script>
+@endif
 <script src="{{asset('/js/fotorama.js')}}"></script>
 <script>
 var product_id =  {{$product->id}};
@@ -132,27 +140,40 @@ new Vue({
    mounted : function(){
     var $fotoramaDiv = $('.fotorama').fotorama();
     this.foto = $fotoramaDiv.data('fotorama');
+    console.log(this.foto);
    },
    data : function(){
       return {
          foto : null,
          variants : variants,
          variantSelected: 0,
-         quantity: 1
+         quantity: 1,
       }
    },
    methods : {
       changePicture: function(){
-         this.foto.show(this.variantSelected);
+         for (let photo in this.foto.data){
+            console.log(this.foto.data[photo].name)
+            if(this.foto.data[photo].name == this.variants[this.variantSelected].variant_name ){
+             this.foto.show(photo);
+             break
+            }
+         }
       },
       addtoCart: function(){
-         axios.post("/addtocart/product/variant",{variant_id: this.variants[this.variantSelected].id, product_id: product_id, quantity : this.quantity}).then(function(res) {
+         let self = this;
+         if(this.variants[this.variantSelected].variant_stock<this.quantity){
+            alert("We don't have this amount in stock");
+         }else {
+            axios.post("/addtocart/product/variant",{variant_id: this.variants[this.variantSelected].id, product_id: product_id, quantity : this.quantity}).then(function(res) {
             if(res.status==200){
                if(res.data=="Success"){
-                  toastr.success(this.variants[this.variantSelected].variant_name + " added to cart!");
+                  toastr.success(self.quantity + " x " +self.variants[self.variantSelected].variant_name + " added to cart!");
                }
             }
          })
+         }
+ 
       }
    },
 

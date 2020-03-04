@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-full">
-        <div v-if="variants!=null" class="bg-white w-1/2 shadow p-2">
+        <div v-if="variants!=null" class="bg-white shadow p-2">
             <h1>Variants</h1>
             <div v-if="variants.length<1">
                 <p>No variants created yet.. Try creating one below.</p>
@@ -10,16 +10,23 @@
                   <th class="border px-4 py-2">Variant Code</th>
                   <th class="border px-4 py-2">Variant Name</th>
                   <th class="border px-4 py-2">Variant Description</th>
+                  <th class="border px-4 py-2">Variant Stock</th>
                   <th class="border px-4 py-2">Variant Price</th>
                   <th class="border px-4 py-2">Belong to</th>
                   <tbody>
                       <tr v-for="(variant,key) in variants" :key="key">
-                          <td class="border px-4 py-2 bg-gray-100">{{variant.variant_product_code}}</td>
-                          <td class="border px-4 py-2 bg-gray-100">{{variant.variant_name}}</td>
-                          <td class="border px-4 py-2 bg-gray-100">{{variant.variant_description}}</td>
-                          <td class="border px-4 py-2 bg-gray-100">{{variant.variant_price}}</td>
-                          <td class="border px-4 py-2 bg-gray-100">{{variant.product}}</td>
-
+                          <td class="border px-4 py-2 bg-gray-100"><input type="text" v-model="variant.variant_product_code"></td>
+                          <td class="border px-4 py-2 bg-gray-100"><input type="text" v-model="variant.variant_name"></td>
+                          <td class="border px-4 py-2 bg-gray-100"><input type="text" v-model="variant.variant_description"></td>
+                        <td class="border px-4 py-2 bg-gray-100"><input type="text" v-model="variant.variant_stock"></td>
+                          <td class="border px-4 py-2 bg-gray-100"><input type="text" v-model="variant.variant_price"></td>
+                          <td class="border px-4 py-2 bg-gray-100">
+                        <select name="VariantProduct" id="variantProduct" v-model="variant.product_id">
+                            <option  v-for="(product,key) in products" :key="key" :value="product.id">{{product.product_code}} - {{product.product_name}}</option>
+                        </select>
+                          </td>
+                        <td class="border px-4 py-2 text-center bg-gray-100"><button class="bg-red-500 p-2 text-white" @click="deleteVariant(variant.id)"> <i class="fas fa-trash"></i></button></td>
+                        <td class="border px-4 py-2 text-center bg-gray-100"><button class="bg-blue-500 p-2 text-white" @click="updateVariant(key)"><i class="fas fa-pen-alt"></i></button></td>
                       </tr>
                   </tbody>
                 </table>
@@ -38,6 +45,9 @@
 
                 <label for="variantprice">Variant Price</label>
                 <input type="text" name="variantprice" placeholder="Variant Price" v-model="variantPrice" class="rounded p-1 bg-gray-300 block m-2">
+                
+                <label for="variantprice">Variant Stock</label>
+                <input type="text" name="variantstock" placeholder="Variant Stock" v-model="variantStock" class="rounded p-1 bg-gray-300 block m-2">
                 
                 <label for="VariantProduct">Variant Belongs to</label>
                 <select name="VariantProduct" id="variantProduct" v-model="variantProduct">
@@ -75,20 +85,24 @@ export default {
 
          if(this.$parent.products==null){
          this.$parent.getProducts().then(done => {
+             that.products = that.$parent.products;
          });
     
         }else {
+             that.products = that.$parent.products;
 
         }
     },
     data : function(){
         return {
+            products : null,
             variants : null,
             variantCode: "",
             variantDescription : "",
             variantName : "",
             variantPrice : 0.0,
             variantProduct: "",
+            variantStock : "",
             files : "",
             fileimages : []
         }
@@ -96,7 +110,7 @@ export default {
     methods : {
      
         addVariant : function(){
-            axios.post("/postvariants",{variantCode: this.variantCode, variantDescription : this.variantDescription, variantName: this.variantName, variantPrice: this.variantPrice, variantProduct: this.variantProduct,images : this.fileimages }).then(res => {
+            axios.post("/postvariants",{variantCode: this.variantCode, variantDescription : this.variantDescription, variantName: this.variantName, variantPrice: this.variantPrice, variantProduct: this.variantProduct,images : this.fileimages, variantStock : this.variantStock }).then(res => {
                if(res.status==200){
                   this.$parent.getVariants().then(done => {
                     this.variants = this.$parent.variants;
@@ -133,7 +147,38 @@ export default {
     
     reader.readAsDataURL(file);
    
-  }
+  },
+  deleteVariant(id){
+        axios.delete("/postvariant/"+id).then(res => {
+               if(res.status==200){
+                  this.$parent.getVariants().then(done => {
+                    this.variants = this.$parent.variants;
+                });
+                
+                  toastr.success("Successfully deleted.");
+
+               }else{
+                  toastr.error("Unable to deleted variant.");
+
+               }
+            })
+  },
+    updateVariant : function(key){
+        let variant = this.variants[key];
+        axios.patch("/updatevariant", {variant : variant}).then(res => {
+        if(res.status==200){
+            this.$parent.getVariants().then(done => {
+            this.variants = this.$parent.variants;
+        });
+
+            toastr.success("Successfully updated.");
+
+        }else{
+            toastr.error("Unable to update variant.");
+
+        }
+    })
+    }
     }
 }
 </script>

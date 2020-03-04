@@ -1,6 +1,6 @@
 <template>
         <div class="w-full h-full">
-        <div v-if="pages!=null" class="bg-white w-1/2 shadow p-2">
+        <div v-if="pages!=null" class="bg-white shadow p-2">
         <h1>Pages</h1>
 
             <div v-if="pages.length<1">
@@ -14,6 +14,8 @@
                       <tr v-for="(page,key) in pages" :key="key">
                           <td class="border px-4 py-2 bg-gray-100"><input type="text" :value="page.page_name"></td>
                           <td class="border px-4 py-2 bg-gray-100"><button class="bg-blue-300 p-2 rounded" @click="selectPage(key)">Select page</button></td>
+                          <td class="border px-4 py-2 text-center bg-gray-100"><button class="bg-red-500 p-2 text-white" @click="deletePage(page.id)"> <i class="fas fa-trash"></i></button></td>
+
                       </tr>
                       <tr>
                           <td class="border px-4 py-2 bg-gray-100"><input type="text" placeholder="Page name" v-model="pagename"></td>
@@ -87,7 +89,22 @@ mounted: function(){
 
                  }
              })
-         }
+         },
+            deletePage : function(id){
+                axios.delete("/postpage/"+id).then(res => {
+                if(res.status==200){
+                    this.$parent.getPages().then(done => {
+                        this.pages = this.$parent.pages;
+                    });
+                    
+                    toastr.success("Successfully deleted.");
+
+                }else{
+                    toastr.error("Unable to deleted category.");
+
+                }
+                })
+        },
      }
 }
 </script>

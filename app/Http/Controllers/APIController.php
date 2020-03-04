@@ -127,6 +127,7 @@ class APIController extends Controller
                 $variant->variant_description = $_request->variantDescription;
                 $variant->variant_price = $_request->variantPrice;
                 $variant->product_id = $_request->variantProduct;
+                $variant->variant_stock = $_request->variantStock;
                 $variant->save();
 
             foreach($_request->images as $key => $image){
@@ -138,7 +139,7 @@ class APIController extends Controller
 
                try {
                 $picture = new Picture();
-                $picture->variant_id =  $_request->variantProduct;
+                $picture->variant_id =  $variant->id;
                 $picture->path = (String) "/images/" . strtolower($_request->variantName) . "-" . $key . "." .$type[0];
                 $picture->Save();
                }catch(\Exception $e){
@@ -191,4 +192,103 @@ class APIController extends Controller
     }
 
     }
+
+
+    protected function DeleteCategory(Request $_request, String $_id){
+        try {
+        Category::where('id',$_id)->first()->delete();
+         return ApiResponses::success();
+    }catch(\Exception $e){
+        return ApiResponses::fail();
+    }   
+
+    }
+
+    protected function UpdateCategory(Request $_request){
+        $_request->validate([
+            'id' => 'required',
+            'category_name' => 'required',
+            'category_description' => 'required'
+        ]);
+        try {
+        $category = Category::where('id', $_request->id)->first();
+        $category->category_name =  $_request->category_name;
+        $category->category_description =  $_request->category_description;
+        $category->update();
+        return ApiResponses::success();
+
+    }catch(\Exception $e){
+        return ApiResponses::fail();
+    }   
+    
+}
+protected function DeleteProduct(Request $_request, String $_id){
+    try {
+    Product::where('id',$_id)->first()->delete();
+     return ApiResponses::success();
+}catch(\Exception $e){
+    return ApiResponses::fail();
+}   
+
+}
+
+protected function UpdateProduct(Request $_request){
+    $_request->validate([
+        'product' => 'required'
+    ]);
+    try {
+    $product = Product::where('id', $_request->product['id'])->first();
+    $product->product_code =  $_request->product['product_code'];
+    $product->product_name =  $_request->product['product_name'];
+    $product->product_description =  $_request->product['product_description'];
+    $product->category_id =  $_request->product['category_id'];
+    $product->update();
+    return ApiResponses::success();
+
+}catch(\Exception $e){
+    return ApiResponses::fail();
+}   
+
+
+}
+protected function DeletePage(Request $_request, String $_id){
+    try {
+    Page::where('id',$_id)->first()->delete();
+     return ApiResponses::success();
+}catch(\Exception $e){
+    return ApiResponses::fail();
+}   
+
+}
+protected function DeleteVariant(Request $_request, String $_id){
+    try {
+    Variant::where('id',$_id)->first()->delete();
+     return ApiResponses::success();
+}catch(\Exception $e){
+    return ApiResponses::fail();
+}   
+
+}
+protected function UpdateVariant(Request $_request){
+    $_request->validate([
+        'variant' => 'required'
+    ]);
+    // try {
+    $variant = Variant::where('id', $_request->variant['id'])->first();
+    $variant->variant_product_code =  $_request->variant['variant_product_code'];
+    $variant->variant_name =  $_request->variant['variant_name'];
+    $variant->variant_description =  $_request->variant['variant_description'];
+    $variant->variant_price =  $_request->variant['variant_price'];
+    $variant->variant_stock =  $_request->variant['variant_stock'];
+    $variant->product_id =  $_request->variant['product_id'];
+    $variant->update();
+    return ApiResponses::success();
+
+// }catch(\Exception $e){
+//     return ApiResponses::fail();
+// }   
+
+
+}
+
 }

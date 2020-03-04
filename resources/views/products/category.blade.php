@@ -10,7 +10,9 @@
 <meta property="og:type"               content="website" />
 <meta property="og:title"              content="{{$category->category_name}}" />
 <meta property="og:description"        content="{{$category->category_description}}" />
+@if($category->Products()->first()->Variants()->exists())
 <meta property="og:image" content="{{asset($category->Products()->first()->Variants()->first()->Picture()->first()->path)}}" />
+@endif
 @endsection
 @section('base.content')
 <section id="category" class="flex flex-col px-2">
@@ -27,16 +29,20 @@
             @if($product->price==0) 
                {{-- If it's a product with variants --}}
                <div class="fotorama">
-     
+                @if($category->Products()->first()->Variants()->exists())
                <img src="{{$product->Variants()->first()->Picture()->first()->path}}" alt="{{$product->product_name}}">
+               @endif
 
                </div>
+               
+               @if($category->Products()->first()->Variants()->exists())
                <div class="text-center">
                <p>
-                  {{$product->Variants()->orderBy("variant_price")->get()->count()}} variants
+               {{$product->Variants()->orderBy("variant_price")->get()->count()}} variants
                FROM <b class="text-blue-500 font-bold">{{$currency}}<span class="text-xl">{{$product->Variants()->orderBy("variant_price")->get()->first()->variant_price}}</span></b>
                </p>
                </div>
+               @endif
                @else
                <p>{{$product->product_name}}</p>
                <p>{{$product->product_price}}</p>

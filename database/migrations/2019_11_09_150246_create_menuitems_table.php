@@ -18,7 +18,7 @@ class CreateMenuitemsTable extends Migration
             $table->integer('menu_order');
             $table->string('menu_item_name');
             $table->integer('page_id')->nullable();
-
+            $table->softDeletes();
             $table->timestamps();
         });
 

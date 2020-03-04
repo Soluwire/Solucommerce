@@ -38,9 +38,11 @@ class AppServiceProvider extends ServiceProvider
             Schema::defaultStringLength(191);
             $menu = MenuItem::all();
             $categories = Category::all();
-            View::share('menuitems', $menu);
-            View::share('categories', $categories);
-            View::share('currency', Config::$currency);
+            View::share(array_merge([
+                'currency' => Config::$currency, 
+                'categories' => $categories,
+                'menuitems' => $menu
+            ]));
 }
 
     }

@@ -1,6 +1,6 @@
 <template>
     <div class="w-full h-full">
-        <div v-if="products!=null" class="bg-white w-1/2 shadow p-2">
+        <div v-if="products!=null" class="bg-white shadow p-2">
             <h1>Products</h1>
             <div v-if="products.length<1">
                 <p>No products created yet.. Try creating one below.</p>
@@ -18,20 +18,26 @@
                     <tbody>
                         <tr  v-for="(product,key) in products" :key="key">
                     <td class="border px-4 py-2 text-center bg-gray-100">
-                        {{product.product_code}} 
+                        <input type="text" v-model="product.product_code">
                     </td>
                        <td class="border px-4 py-2 text-center bg-gray-100">
-                        {{product.product_name}} 
+                        <input type="text" v-model="product.product_name">
                     </td>
-                         <td class="border px-4 py-2 text-center bg-gray-100">
-                           {{product.product_description}} 
+                         <td class="border px-4 py-2 text-center bg-gray-100">  
+                          <input type="text" v-model="product.product_description">
+
                     </td>
                     <td class="border px-4 py-2 text-center bg-gray-100 ">
-                           {{product.product_price}} 
+                           <input type="text" v-model="product.product_price">
                     </td>
                      <td class="border px-4 py-2 text-center bg-gray-100">
-                           {{product.category_id}} 
+                         <select name="" id="" v-model="product.category_id">
+                            <option v-for="category in categories" :value="category.id" :key="category.id">{{category.category_name}}</option>
+                         </select>
                     </td>
+
+                     <td class="border px-4 py-2 text-center bg-gray-100"><button class="bg-red-500 p-2 text-white" @click="deleteProduct(product.id)"> <i class="fas fa-trash"></i></button></td>
+                    <td class="border px-4 py-2 text-center bg-gray-100"><button class="bg-blue-500 p-2 text-white" @click="updateProduct(key)"><i class="fas fa-pen-alt"></i></button></td>
                         </tr>
                          
                     </tbody>
@@ -81,7 +87,7 @@ export default {
         let that = this;
         if(this.$parent.categories==null){
          this.$parent.getCategories().then(done => {
-
+         that.categories = that.$parent.categories;
          });
         }
 
@@ -103,7 +109,8 @@ export default {
             productPrice : 0,
             productCategory : null,
             productCode : "",
-            productHasVariants : true
+            productHasVariants : true,
+            categories : null
         }
     },
     methods : {
@@ -118,6 +125,37 @@ export default {
                 //   this.$forceUpdate();
                }else{
                   toastr.error("Unable to save product.");
+
+               }
+            })
+        },
+         deleteProduct : function(id){
+            axios.delete("/postproduct/"+id).then(res => {
+               if(res.status==200){
+                  this.$parent.getProducts().then(done => {
+                    this.products = this.$parent.products;
+                });
+                
+                  toastr.success("Successfully deleted.");
+
+               }else{
+                  toastr.error("Unable to deleted category.");
+
+               }
+            })
+        },
+        updateProduct : function(key){
+                let product = this.products[key];
+                axios.patch("/updateproduct", {product : product}).then(res => {
+               if(res.status==200){
+                  this.$parent.getProducts().then(done => {
+                    this.products = this.$parent.products;
+                });
+        
+                  toastr.success("Successfully updated.");
+
+               }else{
+                  toastr.error("Unable to update category.");
 
                }
             })

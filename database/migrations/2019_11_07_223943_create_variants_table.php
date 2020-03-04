@@ -21,7 +21,9 @@ class CreateVariantsTable extends Migration
             $table->string('variant_description');
             $table->decimal('variant_price', 10, 2);
             $table->integer('product_id');
+            $table->integer('variant_stock');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

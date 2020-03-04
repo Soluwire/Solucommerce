@@ -44,7 +44,7 @@ class AdminController extends Controller
    protected function ChangeCredentials(Request $_request){
     $users = User::where('type',1)->get();
     foreach($users as $user){
-        if($user->email=="admin@domail.com"){
+        if($user->email=="admin@domain.com"){
             return view("admin.credentials");
 
         }

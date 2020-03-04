@@ -127,9 +127,17 @@
                  <div class="container mx-auto">
                     <div class="flex justify-center">
                         <div class="border p-3 w-1/2 clearfix">
-                            <div id="card-element" class="w-full p-1"></div>
+                        <div id="stripe" v-if="paypal==false">
+                              <div id="card-element" class="w-full p-1"></div>
                         <div id="card-errors" role="alert"></div>
                         <button @click="pay()" v-if="payinit==false" class="p-2 border bg-blue-300 float-right">Pay</button>
+                          <p>Or</p>
+
+                        </div>
+                        <div class="text-center">
+                          <button @click="paypal=true, renderPaypal()" v-if="paypal==false">Pay with Paypal</button>
+                          <div id="paypal-button-container" v-if="paypal==true"></div>
+                        </div>
                         </div>
                     </div>
                  </div>
@@ -187,6 +195,7 @@ export default {
     data : function() {
         return {
             steps : 0,
+            paypal : false,
             successpay: false,
             payinit : false,
             stripe : null,
@@ -316,7 +325,41 @@ export default {
       }
     }
   });
-        }
+        },
+        renderPaypal : function() {
+          // console.log(this.carttotal);
+          let self = this;
+       setTimeout(function(){
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                amount: {
+                    value: self.carttotal
+                }
+                }]
+            });
+            },
+            onApprove: function(data, actions) {
+           
+            return actions.order.capture().then(function(details) {
+                axios.post('/paypal-transaction-completed',{ 
+                    orderId: data.orderID
+                }).then(function(res) {
+                    if(res.data=='success'){
+                          axios.post('/handlepayment',{'deliveryaddress' : self.delivery, 'billingaddress': self.billing},{}).then( function(res){
+                          if(res.status==200 && res.data=="Success"){
+                              self.successpay= true;
+                          }
+                        })
+                    }
+                })
+               
+            });
+    }
+  }).render('#paypal-button-container');
+       },500)
+    },
     },
     props : {
         cart : Array,

@@ -22,6 +22,7 @@ class CreateProductTable extends Migration
             $table->integer('category_id');
             $table->boolean('has_variants');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -17,6 +17,9 @@ Home
     <a href="{{route('viewcategory',UrlHelp::ToUrl($category->category_name))}}">
         <div class="shadow max-w-xs py-4 px-6">
             {{$category->category_name}}
+            @if($category->Products()->first()->Variants()->exists())
+            <img src="{{$category->Products()->first()->Variants()->first()->Picture()->first()->path}}" alt="">
+            @endif
         </div>
     </a>
     @endforeach

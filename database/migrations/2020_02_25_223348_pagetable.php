@@ -18,6 +18,7 @@ class Pagetable extends Migration
             $table->string('page_name');
             $table->longText('page_html',65535);
             $table->timestamps();
+            $table->softDeletes();
         });
 
 
